@@ -6,7 +6,7 @@
  */
 class example {
     // req , model, cursor
-    public function test($req, $model, $cursor){
+    public static function test($req, $model, $cursor){
         $model->select(['username', 'email'])->where('username = "ramo"')->orderBy('username asc');
         return $model->get();
     }
