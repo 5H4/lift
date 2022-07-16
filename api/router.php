@@ -6,7 +6,7 @@
  * - model => activate model.
  */
 const routers = [
-    'check/stock/' => ['post:example@test', 'model'],
+    'users/add/' => ['post:example@test', 'model', 'cursor' => ['username', 'password']],
     'test/' => ['post:example1@view']
 ];
 

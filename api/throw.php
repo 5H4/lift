@@ -46,15 +46,6 @@ if(isset(routers[$path])){
          * value before first is request method.
          */
         $unzip = explode('@', routers[$path][0]);
-        /** if cursor enbled in router.php for each api call. */
-        if(isset(routers[$path]['cursor'])){
-            /** if cursor has slectable items, add to string separated with comma. */
-            foreach(routers[$path]['cursor'] as $index => $arg){
-                $selector = implode(',', $arg);
-            }
-            /** cursor valid, enable it. */
-            $cursor_required = true;
-        }
         /** get all other args from (after path and cursor) */
         foreach(routers[$path] as $index => $arg){
             if($arg == 'model'){
@@ -62,6 +53,16 @@ if(isset(routers[$path])){
                  * model eabled, get table.
                  */
                 $model_required = true;
+            }
+            /** array stuff */
+            if(gettype($arg) == 'array'){
+                /** if cursor enbled in router.php for each api call. */
+                if($index == 'cursor'){
+                    /** if cursor has slectable items, add to string separated with comma. */
+                    $selector = implode(',', $arg);
+                    /** cursor valid, enable it. */
+                    $cursor_required = true;
+                }
             }
         }
     } else {
@@ -132,7 +133,15 @@ if(isset(routers[$path])){
                          * call(class, function)
                          * send(request, model => db, cursor)
                          */
-                        $msg = call_user_func("$class::$function", $_SERVER, $DB, $cursor);
+                          switch($_SERVER['REQUEST_METHOD']){
+                        /**
+                          * switch support methods.
+                          */
+                            case 'POST':    $msg = call_user_func("$class::$function", $_POST, $DB, $cursor);
+                                break;
+                            case 'GET':     $msg = call_user_func("$class::$function", $_GET, $DB, $cursor);
+                                break;
+                          }
                     } else {
                         /** function is defined but not found. */
                         ab("Function [".$function."] doesn't not exists in class  [".$class."]");

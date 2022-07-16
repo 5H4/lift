@@ -57,13 +57,15 @@ class DB {
             throw new \PDOException('Try to access model without permission.');
         }
     }
-    function setModel($model, $selector){
+    function setModel($model, $selector, $cursor = false){
         $this->model = $model;
-        return $this->pdo->query('SELECT '.$selector.' FROM '.$model)->fetchAll(PDO::FETCH_OBJ);
+        if($cursor){
+            return $this->pdo->query('SELECT '.$selector.' FROM '.$model)->fetchAll(PDO::FETCH_OBJ);
+        }
     }
     public function select(array $sql): self{ 
         self::dropError();
-        $this->select_condition = ','.implode(',', $sql);
+        $this->select_condition = implode(',', $sql);
         return $this;
     }
     public function where($sql): self{
@@ -83,15 +85,50 @@ class DB {
     }
     public function get(){
         self::dropError();
-        return $this->pdo->query('SELECT id '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetchAll(PDO::FETCH_OBJ);
+        if($this->select_condition != '*'){
+            $this->select_condition .= ',id';
+        }
+        return $this->pdo->query('SELECT '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetchAll(PDO::FETCH_OBJ);
     }
     public function first(){
         self::dropError();
-        return $this->pdo->query('SELECT id '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetch(PDO::FETCH_OBJ);
+        if($this->select_condition != '*'){
+            $this->select_condition .= ',id';
+        }
+        return $this->pdo->query('SELECT '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetch(PDO::FETCH_OBJ);
     }
-    public function save(){
+    public function save($nan){
         self::dropError();
-        echo self::first()->id;
+        $zip = self::zipUpdateSQL($nan);
+        $r = $this->pdo->prepare('UPDATE '.$this->model.' SET '.$zip[0].'  WHERE id = '.self::first()->id.'');
+        $r->execute($zip[1]);
+        return $r->rowCount() ? true : false;
+    }
+    public function delete($nan){
+        self::dropError();
+        $r = $this->pdo->prepare('DELETE FROM '.$this->model.' WHERE id = ?');
+        $r->execute([self::first()->id]);
+        return $r->rowCount() ? true : false;
+    }
+    public function insert($nan){
+        $zip = self::zipUpdateSQL($nan);
+        $r = $this->pdo->prepare('INSERT INTO '.$this->model.' ('.$zip[3].') VALUES ('.$zip[2].')');
+        $r->execute($zip[1]);
+        return $r->rowCount() ? true : false;
+    }
+    function zipUpdateSQL($nan){
+        $update_key='';$update_val=[];$update_q='';$insert_key='';$last=count((array)$nan);$count=0;
+        foreach($nan as $key=> $value){ 
+            if($key != 'id'){ 
+                $update_key .= $key.'=?,';
+                $insert_key .= $key.',';
+                $update_q .= '?,';
+                $update_val[] = $value; } 
+            $count++; if($last == $count){ 
+                $update_key = substr($update_key, 0, -1);
+                $update_q = substr($update_q, 0, -1);
+                $insert_key = substr($insert_key, 0, -1); }}
+        return array($update_key, $update_val, $update_q, $insert_key);
     }
     function query(){
         return $this->pdo;
