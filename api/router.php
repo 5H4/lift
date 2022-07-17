@@ -6,9 +6,11 @@
  * - model => activate model.
  */
 const routers = [
-    'users/add/' => ['post:example@add', 'model'],
+    'users/add/'    => ['post:example@add', 'model'],
     'users/remove/' => ['post:example@remove', 'model'],
-    'test/' => ['post:example1@view']
+    'users/list/'   => ['get:example@list', 'cursor' => ['*']],
+    'users/get/'    => ['get:example@get', 'model'],
+    'test/'         => ['post:example1@view']
 ];
 
 /**Required !!! */

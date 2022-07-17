@@ -5,7 +5,8 @@ $path = '';
 if(count($case) > 0){
     if($case[1] == PREFIX_API){
         for($x = 2; $x < count($case); $x++){
-            $path .= $case[$x];
+            $jim = explode('?', $case[$x])[0];
+            $path .= $jim;
             if(count($case) != $x){ $path .= '/'; }
         }
         include FOLDER_API.'/router.php';

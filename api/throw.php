@@ -164,13 +164,13 @@ if(isset(routers[$path])){
     }
 } else {
     /** router not exists define in router.php */
-    ab("Router doesn't not exists.");
+    ab("Router doesn't not exists. [".$path."]");
 }
 /**
  * export server response.
  */
-
- /**exported */ echo json_encode($msg);
+/** json response*/ header('Content-Type: application/json; charset=utf-8');
+ /**exported */     echo json_encode($msg);
 
 /** Throw error if something wrong 
  * supported errors:

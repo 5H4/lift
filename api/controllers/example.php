@@ -55,5 +55,30 @@ class example {
             'message' => 'Something is wrong.'
         ];
     }
+
+    public static function list($req, $model, $cursor){
+        return [
+            'success' => true,
+            'message' => 'List.',
+            'data' => $cursor
+        ];
+    }
+    public static function get($req, $model, $cursor){
+        $username = $req['username'];
+        $user = $model->select(['username', 'email'])->where('username = "'.$username.'"')->first();
+
+        if(!$user){
+            return [
+                'success' => false,
+                'message' => 'User dosnt exists.'
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'User',
+            'data' => $user
+        ];
+    }
 }
 
