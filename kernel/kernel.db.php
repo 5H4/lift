@@ -210,11 +210,22 @@ class DB {
      * update by id table.
      */
     public function save($nan){
-        self::dropError();
-        $zip = self::zipUpdateSQL($nan);
-        $r = $this->pdo->prepare('UPDATE '.$this->model.' SET '.$zip[0].'  WHERE id = '.self::first()->id.'');
-        $r->execute($zip[1]);
-        return $r->rowCount() ? true : false;
+        $a = self::dropError()->_instance()->prepare(
+            self::save_builder(
+                self::zipUpdateSQL($nan)[0], 
+                self::first()->id
+                )
+            )->execute(self::zipUpdateSQL($nan)[1]);
+        return $a;
+    }
+    private function save_builder($setter, $id){
+        return 
+        'UPDATE 
+        '.$this->model.' 
+        SET 
+        '.$setter.'  
+        WHERE 
+        id = '.$id.'';
     }
     /**
      * delete by id table.

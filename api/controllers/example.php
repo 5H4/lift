@@ -80,5 +80,15 @@ class example {
             'data' => $user
         ];
     }
+    public static function setUsername($req, $model){
+        $username = $req['username'];
+        $newUsername = $req['new_username'];
+
+        $user = $model->where('username = "'.$username.'"')->first();
+
+        $user->username = $newUsername;
+
+        $model->save($user);
+    }
 }
 
