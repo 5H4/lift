@@ -82,7 +82,7 @@ class DB {
         }}}}
         return false;
     }
-    function dropError(string $a = ''){
+    function dropError(string $a = ''): self{
         /**
          * prepare for error drop.
          * 
@@ -95,6 +95,8 @@ class DB {
         if($a == 'zipJoinSQL'){
             throw new \PDOException('Join format wrong, expected [table, on.cloumn, to.column].');
         }
+
+        return $this;
     }
     /**
      * setModel from route.php [.., 'model'] => enable model.
@@ -167,22 +169,37 @@ class DB {
      * get all.
      */
     public function get(){
-        self::dropError();
-        if($this->select_condition != '*'){
-            $this->select_condition .= ','.$this->model.'.id';
-        }
-        return $this->pdo->query('SELECT '.$this->select_condition.' FROM '.$this->model.' '.$this->innerJoin.' '.$this->leftJoin.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetchAll(PDO::FETCH_OBJ);
+        return self::dropError()->_instance()->query(
+            self::select_builder(
+                self::_num_condition()
+                )
+            )->fetchAll(PDO::FETCH_OBJ);
     }
     /**
      * return as object.
      * get first.
      */
     public function first(){
-        self::dropError();
-        if($this->select_condition != '*'){
-            $this->select_condition .= ','.$this->model.'.id';
-        }
-        return $this->pdo->query('SELECT '.$this->select_condition.' FROM '.$this->model.' '.$this->innerJoin.' '.$this->leftJoin.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetch(PDO::FETCH_OBJ);
+        return self::dropError()->_instance()->query(
+            self::select_builder(
+                self::_num_condition()
+                )
+            )->fetch(PDO::FETCH_OBJ);
+    }
+    private function select_builder(){
+        return 
+        'SELECT 
+        '.$this->select_condition.' 
+        FROM 
+        '.$this->model.' 
+        '.$this->innerJoin.' 
+        '.$this->leftJoin.' 
+        '.$this->andWhere.' 
+        '.$this->orWhere.' 
+        '.$this->orderBy;
+    }
+    private function _num_condition(){
+        return $this->select_condition != '*' ?  $this->select_condition .= ','.$this->model.'.id' : $this->select_condition;
     }
     /**
      * $nan = array
@@ -249,7 +266,7 @@ class DB {
         }
     }
     /**custom raw query */
-    function query(){
+    function _instance(){
         return $this->pdo;
     }
 }
