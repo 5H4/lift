@@ -155,7 +155,7 @@ class DB {
         $this->leftJoin .= ' LEFT JOIN '.$zip;
         return $this;
     }
-    /** Left join */
+    /** Right join */
     public function rightJoin(array $sql): self{
         self::dropError();
         $zip = self::zipJoinSQL($sql);
