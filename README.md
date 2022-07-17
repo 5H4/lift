@@ -1,4 +1,4 @@
-<center><img src='lift.png'></center>
+<p align="center"><img src='lift.png'></p>
 <h1></h1>
 <center>Lift is a small framework that creates a rest api,
 the goal of the lift is to always be small, poison is stored in small bottles.</center>
