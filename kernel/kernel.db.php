@@ -188,10 +188,11 @@ class DB {
     }
     private function select_builder(){
         return 
+        /** select query */
         'SELECT 
         '.$this->select_condition.' 
         FROM 
-        '.$this->model.' 
+        '.$this->model./* table definition*/'
         '.$this->innerJoin.' 
         '.$this->leftJoin.' 
         '.$this->andWhere.' 
