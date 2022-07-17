@@ -164,10 +164,7 @@ class DB {
         $this->leftJoin .= ' RIGHT JOIN '.$zip;
         return $this;
     }
-    /**
-     * return as object array list.
-     * get all.
-     */
+    /** get method , mysql select */
     public function get(){
         return self::dropError()->_instance()->query(
             self::select_builder(
@@ -175,16 +172,56 @@ class DB {
                 )
             )->fetchAll(PDO::FETCH_OBJ);
     }
-    /**
-     * return as object.
-     * get first.
-     */
+    /** get method, mysql select (limit 1) get first. */
     public function first(){
         return self::dropError()->_instance()->query(
             self::select_builder(
                 self::_num_condition()
                 )
             )->fetch(PDO::FETCH_OBJ);
+    }
+    /** save method, mysql update current table by id. */
+    public function save($nan){
+        return self::dropError()->_instance()->prepare(
+            self::save_builder(
+                self::zipUpdateSQL($nan)[0],
+                self::first()->id
+                )
+            )->execute(self::zipUpdateSQL($nan)[1]);
+    }
+    /** delete method, mysql delete current table by id */
+    public function delete(){
+        return self::dropError()->_instance()->prepare(
+            self::delete_builder()
+        )->execute([self::first()->id]);
+    }
+    /**
+     * nan = array
+     * zip = key to a,b : value = ?,?
+     * zip{3} = set keys
+     * zip{2} = set values
+     */
+    public function insert($nan){
+        $zip = self::zipUpdateSQL($nan);
+        $r = $this->pdo->prepare('INSERT INTO '.$this->model.' ('.$zip[3].') VALUES ('.$zip[2].')');
+        $r->execute($zip[1]);
+        return $r->rowCount() ? true : false;
+    }
+    /**Builders. */
+    private function save_builder($setter, $id){
+        return 
+        'UPDATE 
+        '.$this->model.' 
+        SET 
+        '.$setter.'  
+        WHERE 
+        id = '.$id.'';
+    }
+    private function delete_builder(){
+        return 
+        'DELETE FROM 
+        '.$this->model.' 
+        WHERE id = ?';
     }
     private function select_builder(){
         return 
@@ -201,52 +238,6 @@ class DB {
     }
     private function _num_condition(){
         return $this->select_condition != '*' ?  $this->select_condition .= ','.$this->model.'.id' : $this->select_condition;
-    }
-    /**
-     * $nan = array
-     * zip = key to a = ?,b = ? : value to "a","b"
-     * zip{0} = set keys
-     * zip{1} = set values
-     * update by id table.
-     */
-    public function save($nan){
-        $a = self::dropError()->_instance()->prepare(
-            self::save_builder(
-                self::zipUpdateSQL($nan)[0], 
-                self::first()->id
-                )
-            )->execute(self::zipUpdateSQL($nan)[1]);
-        return $a;
-    }
-    private function save_builder($setter, $id){
-        return 
-        'UPDATE 
-        '.$this->model.' 
-        SET 
-        '.$setter.'  
-        WHERE 
-        id = '.$id.'';
-    }
-    /**
-     * delete by id table.
-     */
-    public function delete($nan){
-        self::dropError();
-        $r = $this->pdo->prepare('DELETE FROM '.$this->model.' WHERE id = ?');
-        $r->execute([self::first()->id]);
-        return $r->rowCount() ? true : false;
-    }
-    /**
-     * nan = array
-     * zip = key to a,b : value = ?,?
-     * zip{3} = set keys
-     * zip{2} = set values
-     */
-    public function insert($nan){
-        $zip = self::zipUpdateSQL($nan);
-        $r = $this->pdo->prepare('INSERT INTO '.$this->model.' ('.$zip[3].') VALUES ('.$zip[2].')');
-        $r->execute($zip[1]);
-        return $r->rowCount() ? true : false;
     }
     /**
      * little logic.
