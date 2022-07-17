@@ -65,7 +65,7 @@ class example {
     }
     public static function get($req, $model, $cursor){
         $username = $req['username'];
-        $user = $model->select(['username', 'email'])->where('username = "'.$username.'"')->first();
+        $user = $model->select(['example.username', 'email', 'post.text'])->leftJoin(['post', 'example.username', 'post.username'])->where('example.username = "'.$username.'"')->first();
 
         if(!$user){
             return [

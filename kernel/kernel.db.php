@@ -22,7 +22,8 @@ class DB {
     private $andWhere;
     private $orWhere;
     private $orderBy;
-    private $innerJoin;/**not yet */
+    private $innerJoin;
+    private $leftJoin;
     /**select condition * or add id, index table required id. */
     public $select_condition;
 
@@ -81,7 +82,7 @@ class DB {
         }}}}
         return false;
     }
-    function dropError(){
+    function dropError(string $a = ''){
         /**
          * prepare for error drop.
          * 
@@ -89,6 +90,10 @@ class DB {
          */
         if($this->model == null){
             throw new \PDOException('Try to access model without permission.');
+        }
+
+        if($a == 'zipJoinSQL'){
+            throw new \PDOException('Join format wrong, expected [table, on.cloumn, to.column].');
         }
     }
     /**
@@ -136,6 +141,20 @@ class DB {
         $this->orderBy .= strlen($this->orderBy) == 0 ? 'ORDER BY '.$sql : ', '.$sql;
         return $this;
     }
+    /** Inner join */
+    public function innerJoin(array $sql): self{
+        self::dropError();
+        $zip = self::zipJoinSQL($sql);
+        $this->innerJoin .= ' INNER JOIN '.$zip;
+        return $this;
+    }
+    /** Left join */
+    public function leftJoin(array $sql): self{
+        self::dropError();
+        $zip = self::zipJoinSQL($sql);
+        $this->leftJoin .= ' LEFT JOIN '.$zip;
+        return $this;
+    }
     /**
      * return as object array list.
      * get all.
@@ -143,9 +162,9 @@ class DB {
     public function get(){
         self::dropError();
         if($this->select_condition != '*'){
-            $this->select_condition .= ',id';
+            $this->select_condition .= ','.$this->model.'.id';
         }
-        return $this->pdo->query('SELECT '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetchAll(PDO::FETCH_OBJ);
+        return $this->pdo->query('SELECT '.$this->select_condition.' FROM '.$this->model.' '.$this->innerJoin.' '.$this->leftJoin.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetchAll(PDO::FETCH_OBJ);
     }
     /**
      * return as object.
@@ -154,9 +173,9 @@ class DB {
     public function first(){
         self::dropError();
         if($this->select_condition != '*'){
-            $this->select_condition .= ',id';
+            $this->select_condition .= ','.$this->model.'.id';
         }
-        return $this->pdo->query('SELECT '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetch(PDO::FETCH_OBJ);
+        return $this->pdo->query('SELECT '.$this->select_condition.' FROM '.$this->model.' '.$this->innerJoin.' '.$this->leftJoin.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetch(PDO::FETCH_OBJ);
     }
     /**
      * $nan = array
@@ -214,6 +233,13 @@ class DB {
                 $update_q = substr($update_q, 0, -1);
                 $insert_key = substr($insert_key, 0, -1); }}
         return array($update_key, $update_val, $update_q, $insert_key);
+    }
+    function zipJoinSQL($nan){
+        if(count($nan) == 3){
+            return $nan[0].' ON '.$nan[1].' = '.$nan[2];
+        } else {
+            self::dropError('zipJoinSQL');
+        }
     }
     /**custom raw query */
     function query(){
