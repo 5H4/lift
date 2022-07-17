@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 
 require 'kernel/constant.php';
 require 'kernel/readenv.php';
+require 'kernel/sql.builder.php';
 require 'kernel/kernel.db.php';
 
 $DB = new DB($env);

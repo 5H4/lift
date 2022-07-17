@@ -1,6 +1,6 @@
 <?php
 
-class DB {
+class DB extends Builder {
     /**Database pdo. */
     private $pdo;
     /**Database port. */
@@ -19,11 +19,11 @@ class DB {
     public $model;
 
     /**Table methods: supported. */
-    private $andWhere;
-    private $orWhere;
-    private $orderBy;
-    private $innerJoin;
-    private $leftJoin;
+    public $andWhere;
+    public $orWhere;
+    public $orderBy;
+    public $innerJoin;
+    public $leftJoin;
     /**select condition * or add id, index table required id. */
     public $select_condition;
 
@@ -145,23 +145,17 @@ class DB {
     }
     /** Inner join */
     public function innerJoin(array $sql): self{
-        self::dropError();
-        $zip = self::zipJoinSQL($sql);
-        $this->innerJoin .= ' INNER JOIN '.$zip;
+        $this->innerJoin .= ' INNER JOIN '.self::dropError()->zipJoinSQL($sql);
         return $this;
     }
     /** Left join */
     public function leftJoin(array $sql): self{
-        self::dropError();
-        $zip = self::zipJoinSQL($sql);
-        $this->leftJoin .= ' LEFT JOIN '.$zip;
+        $this->leftJoin .= ' LEFT JOIN '.self::dropError()->zipJoinSQL($sql);
         return $this;
     }
     /** Right join */
     public function rightJoin(array $sql): self{
-        self::dropError();
-        $zip = self::zipJoinSQL($sql);
-        $this->leftJoin .= ' RIGHT JOIN '.$zip;
+        $this->leftJoin .= ' RIGHT JOIN '.self::dropError()->zipJoinSQL($sql);
         return $this;
     }
     /** get method , mysql select */
@@ -169,16 +163,16 @@ class DB {
         return self::dropError()->_instance()->query(
             self::select_builder(
                 self::_num_condition()
-                )
-            )->fetchAll(PDO::FETCH_OBJ);
+            )
+        )->fetchAll(PDO::FETCH_OBJ);
     }
     /** get method, mysql select (limit 1) get first. */
     public function first(){
         return self::dropError()->_instance()->query(
             self::select_builder(
                 self::_num_condition()
-                )
-            )->fetch(PDO::FETCH_OBJ);
+            )
+        )->fetch(PDO::FETCH_OBJ);
     }
     /** save method, mysql update current table by id. */
     public function save($nan){
@@ -186,8 +180,8 @@ class DB {
             self::save_builder(
                 self::zipUpdateSQL($nan)[0],
                 self::first()->id
-                )
-            )->execute(self::zipUpdateSQL($nan)[1]);
+            )
+        )->execute(self::zipUpdateSQL($nan)[1]);
     }
     /** delete method, mysql delete current table by id */
     public function delete(){
@@ -195,49 +189,12 @@ class DB {
             self::delete_builder()
         )->execute([self::first()->id]);
     }
-    /**
-     * nan = array
-     * zip = key to a,b : value = ?,?
-     * zip{3} = set keys
-     * zip{2} = set values
-     */
+    /** insert method, mysql insert (new records) */
     public function insert($nan){
         $zip = self::zipUpdateSQL($nan);
-        $r = $this->pdo->prepare('INSERT INTO '.$this->model.' ('.$zip[3].') VALUES ('.$zip[2].')');
-        $r->execute($zip[1]);
-        return $r->rowCount() ? true : false;
-    }
-    /**Builders. */
-    private function save_builder($setter, $id){
-        return 
-        'UPDATE 
-        '.$this->model.' 
-        SET 
-        '.$setter.'  
-        WHERE 
-        id = '.$id.'';
-    }
-    private function delete_builder(){
-        return 
-        'DELETE FROM 
-        '.$this->model.' 
-        WHERE id = ?';
-    }
-    private function select_builder(){
-        return 
-        /** select query */
-        'SELECT 
-        '.$this->select_condition.' 
-        FROM 
-        '.$this->model./* table definition*/'
-        '.$this->innerJoin.' 
-        '.$this->leftJoin.' 
-        '.$this->andWhere.' 
-        '.$this->orWhere.' 
-        '.$this->orderBy;
-    }
-    private function _num_condition(){
-        return $this->select_condition != '*' ?  $this->select_condition .= ','.$this->model.'.id' : $this->select_condition;
+        return self::dropError()->_instance()->prepare(
+            self::insert_builder($zip)
+        )->execute($zip[1]);
     }
     /**
      * little logic.
