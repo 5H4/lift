@@ -155,6 +155,13 @@ class DB {
         $this->leftJoin .= ' LEFT JOIN '.$zip;
         return $this;
     }
+    /** Left join */
+    public function rightJoin(array $sql): self{
+        self::dropError();
+        $zip = self::zipJoinSQL($sql);
+        $this->leftJoin .= ' RIGHT JOIN '.$zip;
+        return $this;
+    }
     /**
      * return as object array list.
      * get all.
