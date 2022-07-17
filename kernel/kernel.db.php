@@ -1,32 +1,50 @@
 <?php
 
 class DB {
-    public $pdo;
-    public $model;
+    /**Database pdo. */
+    private $pdo;
+    /**Database port. */
     private $port;
+    /**Database charset. */
     private $charset;
+    /**Database host. */
     private $host;
+    /**Database user. */
     private $user;
+    /**Database password. */
     private $pass;
+    /**Database name. */
     private $dbaa;
-    //
+    /**Database table. */
+    public $model;
+
+    /**Table methods: supported. */
     private $andWhere;
     private $orWhere;
     private $orderBy;
-    private $innerJoin;
+    private $innerJoin;/**not yet */
+    /**select condition * or add id, index table required id. */
     public $select_condition;
 
     function __construct($env)
     {
+        /**Default port. */
         $this->port = "3306";
+        /**Default charset. */
         $this->charset = 'utf8mb4';
+        /**Connect to server if need. */
         $this->pdo = self::connect($env);
+        /**Reset table. */
         $this->model = null;
+        /**Default all. */
         $this->select_condition = '*';
     }
     function connect($env){
+        /** Get env variables readenv.php */
         $env_empty = self::envEmpty($env);
+        /** if .env file empty, database not required. */
         if($env_empty){
+            /** Some stupid default stuff. */
             $options = [
                 \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
@@ -39,9 +57,20 @@ class DB {
                 throw new \PDOException($e->getMessage(), (int)$e->getCode());
             }
         }
+        /**
+         * For public use return empty
+         * TO-DO
+         * public / index.php /index.html
+         */
         return '';
     }
     function envEmpty($env){
+        /**
+         * Check for .env database setup
+         * [host,user,pass,dbaa,port,charset]
+         * first check if defined if not use default [port, charset]
+         * if host.. not defined dont throw error just say database not required.
+         */
         if(isset($env->host) && !empty($env->host)){ $this->host = trim($env->host);
         if(isset($env->user) && !empty($env->user)){ $this->user = trim($env->user);
         if(isset($env->pass)){ $this->pass = empty($env->pass) ? '' : trim($env->pass);
@@ -53,36 +82,64 @@ class DB {
         return false;
     }
     function dropError(){
+        /**
+         * prepare for error drop.
+         * 
+         * if model not define , and try from no model class invoke table -> drop error.
+         */
         if($this->model == null){
             throw new \PDOException('Try to access model without permission.');
         }
     }
+    /**
+     * setModel from route.php [.., 'model'] => enable model.
+     * migration -> create table in mysql as same name as class/classFile.
+     */
     function setModel($model, $selector, $cursor = false){
         $this->model = $model;
+        /**
+         * cursor fetch all from table, so be cerfull if we have some milion rows, myb chunk ??
+         */
         if($cursor){
+            /** selector from var, model from define, fetch as object nice -> usage. */
             return $this->pdo->query('SELECT '.$selector.' FROM '.$model)->fetchAll(PDO::FETCH_OBJ);
         }
     }
+    /**
+     * GLOBAL: self usage for fun1()->fun2();etc..
+     * 
+     * select: !important !required array.
+     * [1,2,3] array to = > 1,2,3 string.
+     */
     public function select(array $sql): self{ 
         self::dropError();
         $this->select_condition = implode(',', $sql);
         return $this;
     }
-    public function where($sql): self{
+    /** what say: myb drop virus like and bla = 1 group... 
+     * hmm ?. bug[1] nexter.
+    */
+    public function where(string $sql): self{
         self::dropError();
         $this->andWhere .= strlen($this->andWhere) == 0 ? 'WHERE '.$sql : 'AND '.$sql;
         return $this;
     }
-    public function orWhere($sql): self{
+    /**bug[1] */
+    public function orWhere(string $sql): self{
         self::dropError();
         $this->orWhere .= strlen($this->orWhere) == 0 ? strlen($this->andWhere) == 0 ? $sql : 'OR '.$sql : 'AND '.$sql;
         return $this;
     }
-    public function orderBy($sql): self{
+    /**bug[1] */
+    public function orderBy(string $sql): self{
         self::dropError();
         $this->orderBy .= strlen($this->orderBy) == 0 ? 'ORDER BY '.$sql : ', '.$sql;
         return $this;
     }
+    /**
+     * return as object array list.
+     * get all.
+     */
     public function get(){
         self::dropError();
         if($this->select_condition != '*'){
@@ -90,6 +147,10 @@ class DB {
         }
         return $this->pdo->query('SELECT '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetchAll(PDO::FETCH_OBJ);
     }
+    /**
+     * return as object.
+     * get first.
+     */
     public function first(){
         self::dropError();
         if($this->select_condition != '*'){
@@ -97,6 +158,13 @@ class DB {
         }
         return $this->pdo->query('SELECT '.$this->select_condition.' '.$this->innerJoin.' FROM '.$this->model.' '.$this->andWhere.' '.$this->orWhere.' '.$this->orderBy)->fetch(PDO::FETCH_OBJ);
     }
+    /**
+     * $nan = array
+     * zip = key to a = ?,b = ? : value to "a","b"
+     * zip{0} = set keys
+     * zip{1} = set values
+     * update by id table.
+     */
     public function save($nan){
         self::dropError();
         $zip = self::zipUpdateSQL($nan);
@@ -104,18 +172,35 @@ class DB {
         $r->execute($zip[1]);
         return $r->rowCount() ? true : false;
     }
+    /**
+     * delete by id table.
+     */
     public function delete($nan){
         self::dropError();
         $r = $this->pdo->prepare('DELETE FROM '.$this->model.' WHERE id = ?');
         $r->execute([self::first()->id]);
         return $r->rowCount() ? true : false;
     }
+    /**
+     * nan = array
+     * zip = key to a,b : value = ?,?
+     * zip{3} = set keys
+     * zip{2} = set values
+     */
     public function insert($nan){
         $zip = self::zipUpdateSQL($nan);
         $r = $this->pdo->prepare('INSERT INTO '.$this->model.' ('.$zip[3].') VALUES ('.$zip[2].')');
         $r->execute($zip[1]);
         return $r->rowCount() ? true : false;
     }
+    /**
+     * little logic.
+     * formating pdo update, insert  (preparing)
+     * like : 
+     * bindParam(a => b)
+     * bindPara(:a, b)
+     * fixed comma remove from last shit.
+     */
     function zipUpdateSQL($nan){
         $update_key='';$update_val=[];$update_q='';$insert_key='';$last=count((array)$nan);$count=0;
         foreach($nan as $key=> $value){ 
@@ -130,6 +215,7 @@ class DB {
                 $insert_key = substr($insert_key, 0, -1); }}
         return array($update_key, $update_val, $update_q, $insert_key);
     }
+    /**custom raw query */
     function query(){
         return $this->pdo;
     }

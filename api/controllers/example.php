@@ -6,7 +6,7 @@
  */
 class example {
     // req , model, cursor
-    public static function test($req, $model, $cursor){
+    public static function add($req, $model, $cursor){
         $username = $req['username'];
         $password = $req['password'];
         $email = $req['email'];
@@ -20,7 +20,6 @@ class example {
             ];
         }
         
-
         $a = new stdClass();
         $a->username = $username;
         $a->email = $email;
@@ -31,6 +30,29 @@ class example {
         return [
             'success' => true,
             'message' => 'User added'
+        ];
+    }
+    public static function remove($req, $model){
+        $username = $req['username'];
+        $user = $model->where('username = "'.$username.'"')->first();
+
+        if(!$user){
+            return [
+                'success' => false,
+                'message' => 'User dosnt exists.'
+            ];
+        }
+
+        if($model->delete($user)){
+            return [
+                'success' => true,
+                'message' => 'User removed.'
+            ];
+        }
+
+        return [
+            'success' => false,
+            'message' => 'Something is wrong.'
         ];
     }
 }
