@@ -18,17 +18,20 @@ Create new table Users.
 
 Roll it.
 
-Where
+<h3>Where</h3>
+
 ```php
 $lift->model->where('username = "lift"')->where('passwrod  = "lift123"')->first();
 ```
 
-orWhere
+<h3>orWhere</h3>
+
 ```php
 $lift->model->where('username = "lift"')->orWhere('username  like "lif%"')->first();
 ```
 
-<strong>innerJoin , leftJoin, rightJoin</strong>
+<h3>innerJoin , leftJoin, rightJoin</h3>
+
 ```php
 ->innerJoin
 ->leftJoin
@@ -37,12 +40,19 @@ $lift->model->where('username = "lift"')
 ->EXAMPLES(['posts', 'posts.username', 'example.username'])->get();
 ```
 
-selectable
+<h3>Selectable</h3>
+
 ```php
 $lift->model->select(['username', 'password'])->where('username = "lift"')->rightJoin(['posts', 'posts.username', 'example.username'])->get();
 ```
 
-<h2>Update</h2>
+<h3>Order by</h3>
+
+```php
+$user = $lift->model->where('username like "%a%"')->orderBy('username asc')->first();
+```
+
+<h3>Update</h3>
 
 ```php
 $user = $lift->model->where('username = "lift"')->first();
@@ -52,7 +62,7 @@ $user->username =  'newUsername';
 $lift->model->save($user);
 ```
 
-<h2>Insert</h2>
+<h3>Insert</h3>
 
 ```php
 $user = new stdClass;
