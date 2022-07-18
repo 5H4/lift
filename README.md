@@ -8,7 +8,7 @@ the goal of the lift is to always be small, poison is stored in small bottles.</
 api/router.php
 ```php
 const routers = [
-    'users/list/'   => ['get:example@list', 'model', 'cursor' => ['*']],
+    'users/list/'   => ['get:users@list', 'model', 'cursor' => ['*']],
 ];
 ```
 

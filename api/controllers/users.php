@@ -7,7 +7,7 @@
 class example {
     // req , model, cursor
     public static function list(Lift $lift){
-        return $lift->model->where('username is not null')->get();
+        return $lift->model->where('username = "lift"')->get();
     }
 }
 
