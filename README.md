@@ -18,6 +18,17 @@ Create new table Users.
 
 Roll it.
 
+<h3>Example class</h3>
+
+```php
+class users {
+    public static function list(Lift $lift){
+        /**Logic*/
+        return $lift->model->where('username = "lift"')->first();
+    }
+}
+```
+
 <h3>Where</h3>
 
 ```php
