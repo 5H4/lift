@@ -7,20 +7,8 @@ the goal of the lift is to always be small, poison is stored in small bottles.</
 
 api/router.php
 ```php
-/** 
- * post:example@add
- * [post, example, add]
- * [method, class, function]
- * [model] => enable or disable
- * cursor => [] fetch all, array selectable items.
- * * => all, example: ['username', 'password']
- */
 const routers = [
-    'users/add/'    => ['post:example@add', 'model'],
-    'users/remove/' => ['post:example@remove', 'model'],
-    'users/list/'   => ['get:example@list', 'cursor' => ['*']],
-    'users/get/'    => ['get:example@get', 'model'],
-    'test/'         => ['post:example1@view']
+    'users/list/'   => ['get:example@list', 'model', 'cursor' => ['*']],
 ];
 ```
 
@@ -30,3 +18,54 @@ Create new table Users.
 
 Roll it.
 
+Where
+```php
+$lift->model->where('username = "lift"')->where('passwrod  = "lift123"')->first();
+```
+
+orWhere
+```php
+$lift->model->where('username = "lift"')->orWhere('username  like "lif%"')->first();
+```
+
+innerJoin
+```php
+$lift->model->where('username = "lift"')->innerJoin('posts on posts.username = example.username')->first();
+```
+
+leftJoin
+```php
+$lift->model->where('username = "lift"')->leftJoin('posts on posts.username = example.username')->first();
+```
+
+rightJoin
+```php
+$lift->model->where('username = "lift"')->rightJoin('posts on posts.username = example.username')->first();
+```
+
+selectable
+```php
+$lift->model->select(['username', 'password'])->where('username = "lift"')->rightJoin('posts on posts.username = example.username')->first();
+```
+
+<h2>Update</h2>
+
+```php
+$user = $lift->model->where('username = "lift"')->first();
+
+$user->username =  'newUsername';
+
+$lift->model->save($user);
+```
+
+<h2>Insert</h2>
+
+```php
+$user = new stdClass;
+
+$user->username = 'test1';
+$user->password = '12345';
+$user->email = 'test@bla.com';
+
+$lift->model->insert($user);
+```
