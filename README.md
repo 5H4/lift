@@ -43,7 +43,7 @@ $lift->model->where('username = "lift"')
 <h3>Selectable</h3>
 
 ```php
-$lift->model->select(['username', 'password'])->where('username = "lift"')->rightJoin(['posts', 'posts.username', 'example.username'])->get();
+$lift->model->select(['username', 'password'])->where('username = "lift"')->get();
 ```
 
 <h3>Order by</h3>
