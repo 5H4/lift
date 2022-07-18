@@ -30,22 +30,22 @@ $lift->model->where('username = "lift"')->orWhere('username  like "lif%"')->firs
 
 innerJoin
 ```php
-$lift->model->where('username = "lift"')->innerJoin('posts on posts.username = example.username')->first();
+$lift->model->where('username = "lift"')->innerJoin('posts on posts.username = example.username')->get();
 ```
 
 leftJoin
 ```php
-$lift->model->where('username = "lift"')->leftJoin('posts on posts.username = example.username')->first();
+$lift->model->where('username = "lift"')->leftJoin('posts on posts.username = example.username')->get();
 ```
 
 rightJoin
 ```php
-$lift->model->where('username = "lift"')->rightJoin('posts on posts.username = example.username')->first();
+$lift->model->where('username = "lift"')->rightJoin('posts on posts.username = example.username')->get();
 ```
 
 selectable
 ```php
-$lift->model->select(['username', 'password'])->where('username = "lift"')->rightJoin('posts on posts.username = example.username')->first();
+$lift->model->select(['username', 'password'])->where('username = "lift"')->rightJoin('posts on posts.username = example.username')->get();
 ```
 
 <h2>Update</h2>
