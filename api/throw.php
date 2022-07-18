@@ -137,9 +137,9 @@ if(isset(routers[$path])){
                         /**
                           * switch support methods.
                           */
-                            case 'POST':    $msg = call_user_func("$class::$function", $_POST, $DB, $cursor);
+                            case 'POST':    $msg = call_user_func("$class::$function", new Lift($_POST, $DB, $cursor));
                                 break;
-                            case 'GET':     $msg = call_user_func("$class::$function", $_GET, $DB, $cursor);
+                            case 'GET':     $msg = call_user_func("$class::$function", new Lift($_GET, $DB, $cursor));
                                 break;
                           }
                     } else {

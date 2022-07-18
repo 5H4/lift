@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 
 require 'kernel/constant.php';
 require 'kernel/readenv.php';
+require 'kernel/kernel.lift.php';
 require 'kernel/sql.builder.php';
 require 'kernel/kernel.db.php';
 
