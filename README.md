@@ -28,19 +28,13 @@ orWhere
 $lift->model->where('username = "lift"')->orWhere('username  like "lif%"')->first();
 ```
 
-innerJoin
+<strong>innerJoin , leftJoin, rightJoin</strong>
 ```php
-$lift->model->where('username = "lift"')->innerJoin(['posts', 'posts.username', 'example.username'])->get();
-```
-
-leftJoin
-```php
-$lift->model->where('username = "lift"')->leftJoin(['posts', 'posts.username', 'example.username'])->get();
-```
-
-rightJoin
-```php
-$lift->model->where('username = "lift"')->rightJoin(['posts', 'posts.username', 'example.username'])->get();
+->innerJoin
+->leftJoin
+->rightJoin
+$lift->model->where('username = "lift"')
+->EXAMPLES(['posts', 'posts.username', 'example.username'])->get();
 ```
 
 selectable
