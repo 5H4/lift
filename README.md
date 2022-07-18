@@ -24,6 +24,12 @@ Roll it.
 $lift->model->where('username = "lift"')->where('passwrod  = "lift123"')->first();
 ```
 
+<h3>Selectable</h3>
+
+```php
+$lift->model->select(['username', 'password'])->where('username = "lift"') ->get();
+```
+
 <h3>orWhere</h3>
 
 ```php
@@ -38,12 +44,6 @@ $lift->model->where('username = "lift"')->orWhere('username  like "lif%"')->firs
 ->rightJoin
 $lift->model->where('username = "lift"')
 ->EXAMPLES(['posts', 'posts.username', 'example.username'])->get();
-```
-
-<h3>Selectable</h3>
-
-```php
-$lift->model->select(['username', 'password'])->where('username = "lift"')->get();
 ```
 
 <h3>Order by</h3>
