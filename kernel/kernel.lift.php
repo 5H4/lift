@@ -1,5 +1,4 @@
 <?php
-
 class Lift {
     function __construct($method, $table, $cursor)
     {

@@ -1,5 +1,4 @@
 <?php
-
 class DB extends Builder {
     /**Database pdo. */
     private $pdo;
